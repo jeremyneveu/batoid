@@ -20,7 +20,7 @@ from .medium import (
 )
 
 from .obscuration import (
-    Obscuration, ObscCircle, ObscAnnulus, ObscRectangle, ObscRay, ObscPolygon,
+    Obscuration, ObscCircle, ObscEllipse, ObscAnnulus, ObscRectangle, ObscRay, ObscPolygon,
     ObscNegation, ObscUnion, ObscIntersection
 )
 

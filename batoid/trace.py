@@ -61,7 +61,7 @@ def intersect(surface, rv, coordSys=None, coating=None):
         coordSys = rv.coordSys
     ct = CoordTransform(rv.coordSys, coordSys)
     _coating = coating._coating if coating else None
-
+    print(f'in intersect, {surface._surface}, {ct.dr}, {ct.drot}, {rv._rv}, {_coating}')
     _batoid.intersect(
         surface._surface,
         ct.dr, ct.drot.ravel(),

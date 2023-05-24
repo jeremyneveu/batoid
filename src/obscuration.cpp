@@ -67,6 +67,33 @@ namespace batoid {
     }
 
 
+  ObscEllipse::ObscEllipse(double a, double b, double x0, double y0) :
+    Obscuration(), _a(a), _b(b), _x0(x0), _y0(y0)
+        {}
+
+        ObscEllipse::~ObscEllipse() {}
+
+        bool ObscEllipse::contains(double x, double y) const {
+            return std::hypot((x-_x0)/_a, (y-_y0)/_b) < 1.;
+        }
+
+    const Obscuration* ObscEllipse::getDevPtr() const {
+        #if defined(BATOID_GPU)
+            if (_devPtr)
+                return _devPtr;
+            Obscuration* ptr;
+            #pragma omp target map(from:ptr)
+            {
+	      ptr = new ObscEllipse(_a, _b, _x0, _y0);
+            }
+            _devPtr = ptr;
+            return ptr;
+        #else
+            return this;
+        #endif
+    }
+  
+  
     #if defined(BATOID_GPU)
         #pragma omp declare target
     #endif

@@ -87,6 +87,49 @@ class ObscCircle(Obscuration):
         out += ")"
         return out
 
+class ObscEllipse(Obscuration):
+    """A elliptical obscuration.
+
+    Parameters
+    ----------
+    a, b : float
+        major and minor semi-axis in meters.
+    x, y : float, optional
+        Coordinates of circle center in meters.  [default: 0.0]
+    """
+    def __init__(self, a, b, x=0.0, y=0.0):
+        self.a = a
+        self.b = b
+        self.x = x
+        self.y = y
+        self._obsc = _batoid.CPPObscEllipse(a, b, x, y)
+
+    def __eq__(self, rhs):
+        if type(rhs) == type(self):
+            return (
+                self.a == rhs.a
+                and self.b == rhs.b
+                and self.x == rhs.x
+                and self.y == rhs.y
+            )
+        return False
+
+    def __getstate__(self):
+        return self.a, self.b, self.x, self.y
+
+    def __setstate__(self, args):
+        self.a, self.b, self.x, self.y = args
+        self._obsc = _batoid.CPPObscCircle(*args)
+
+    def __hash__(self):
+        return hash(("batoid.ObscEllipse", self.a, self.b, self.x, self.y))
+
+    def __repr__(self):
+        out = f"ObscEllipse({self.a}, {self.b}"
+        if self.x != 0 or self.y != 0:
+            out += f", {self.x}, {self.y}"
+        out += ")"
+        return out
 
 class ObscAnnulus(Obscuration):
     """An annular obscuration.
