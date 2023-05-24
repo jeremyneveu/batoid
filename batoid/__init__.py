@@ -7,7 +7,7 @@ from .coordTransform import CoordTransform
 
 from .surface import (
     Surface, Plane, Paraboloid, Sphere, Quadric, Asphere, Bicubic, Sum, Tilted,
-    Zernike
+    Zernike, Grating
 )
 
 from .trace import (

@@ -33,6 +33,20 @@ namespace batoid {
         const Coating& coating,
         RayVector& rv, RayVector& rvSplit
     );
+    void reflect_grating(
+        const Surface& surface, const vec3 dr, const mat3 drot, RayVector& rv,
+        const Coating* coating
+    );
+    void refract_grating(
+        const Surface& surface, const vec3 dr, const mat3 drot,
+        const Medium& m1, const Medium& m2, RayVector& rv, const Coating* coating
+    );
+    void rSplit_grating(
+        const Surface& surface, const vec3 dr, const mat3 drot,
+        const Medium& m1, const Medium& m2,
+        const Coating& coating,
+        RayVector& rv, RayVector& rvSplit
+    );
     void refractScreen(
         const Surface& surface, const vec3 dr, const mat3 drot,
         const Surface& screen, RayVector& rv
