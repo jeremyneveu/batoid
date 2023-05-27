@@ -815,12 +815,10 @@ namespace batoid {
     }
 
     void reflect_grating(
-        const Surface& surface,
+        const Grating& grating,
         const vec3 dr, const mat3 drot,
         RayVector& rv,
-        const Coating* coating,
-        const double N,
-        const double rot
+        const Coating* coating
     ) {
         rv.x.syncToDevice();
         rv.y.syncToDevice();
@@ -848,14 +846,12 @@ namespace batoid {
         bool* vigptr = rv.vignetted.data;
         bool* failptr = rv.failed.data;
 
-        const Surface* surfacePtr = surface.getDevPtr();
+        const Grating* gratingPtr = grating.getDevPtr();
         const double* drptr = dr.data();
         const double* drotptr = drot.data();
         const Coating* coatingPtr = nullptr;
         if (coating)
             coatingPtr = coating->getDevPtr();
-        const double cosrot = cos(rot);
-        const double sinrot = sin(rot);
 
         #if defined(BATOID_GPU)
             #pragma omp target teams distribute parallel for \
@@ -879,7 +875,7 @@ namespace batoid {
             if (!failptr[i]) {
                 // intersection
                 double dt = 0.0;
-                bool success = surfacePtr->timeToIntersect(x, y, z, vx, vy, vz, dt);
+                bool success = gratingPtr->timeToIntersect(x, y, z, vx, vy, vz, dt);
                 if (success) {
                     // propagation
                     x += vx * dt;
@@ -896,7 +892,11 @@ namespace batoid {
                     double nvy = vy*n1;
                     double nvz = vz*n1;
                     double nx, ny, nz;
-                    surfacePtr->normal(x, y, nx, ny, nz);
+                    gratingPtr->normal(x, y, nx, ny, nz);
+                    double tx, ty, tz;
+                    gratingPtr->disp_axis(x, y, tx, ty, tz);
+                    // local number of grooves
+                    double N = gratingPtr->getN(x, y);
                     // alpha = v dot normVec
                     double alpha = nvx*nx;
                     alpha += nvy*ny;
@@ -912,8 +912,8 @@ namespace batoid {
                     double sin_grating = -sin_incident + grating_shift;
                     double nfactor = alpha - sqrt(1-sin_grating*sin_grating);
                     // output
-                    vxptr[i] = nvx - nfactor*nx + cosrot*grating_shift;
-                    vyptr[i] = nvy - nfactor*ny + sinrot*grating_shift;
+                    vxptr[i] = nvx - nfactor*nx + tx*grating_shift;
+                    vyptr[i] = nvy - nfactor*ny + ty*grating_shift;
                     vzptr[i] = nvz - nfactor*nz;
                     vxptr[i] /= n1;
                     vyptr[i] /= n1;
@@ -935,13 +935,11 @@ namespace batoid {
 
 
     void refract_grating(
-        const Surface& surface,
+        const Grating& grating,
         const vec3 dr, const mat3 drot,
         const Medium& m1, const Medium& m2,
         RayVector& rv,
-        const Coating* coating,
-        const double N,
-        const double rot
+        const Coating* coating
     ) {
         rv.x.syncToDevice();
         rv.y.syncToDevice();
@@ -969,15 +967,13 @@ namespace batoid {
         bool* vigptr = rv.vignetted.data;
         bool* failptr = rv.failed.data;
 
-        const Surface* surfacePtr = surface.getDevPtr();
+        const Grating* gratingPtr = grating.getDevPtr();
         const double* drptr = dr.data();
         const double* drotptr = drot.data();
         const Medium* mPtr = m2.getDevPtr();
         const Coating* coatingPtr = nullptr;
         if (coating)
             coatingPtr = coating->getDevPtr();
-        const double cosrot = cos(rot);
-        const double sinrot = sin(rot);
 
         #if defined(BATOID_GPU)
             #pragma omp target teams distribute parallel for \
@@ -1001,7 +997,7 @@ namespace batoid {
             if (!failptr[i]) {
                 // intersection
                 double dt = 0.0;
-                bool success = surfacePtr->timeToIntersect(x, y, z, vx, vy, vz, dt);
+                bool success = gratingPtr->timeToIntersect(x, y, z, vx, vy, vz, dt);
                 if (success) {
                     // propagation
                     x += vx * dt;
@@ -1018,7 +1014,12 @@ namespace batoid {
                     double nvy = vy*n1;
                     double nvz = vz*n1;
                     double nx, ny, nz;
-                    surfacePtr->normal(x, y, nx, ny, nz);
+                    gratingPtr->normal(x, y, nx, ny, nz);
+                    // disp axis unit vector
+                    double tx, ty, tz;
+                    gratingPtr->disp_axis(x, y, tx, ty, tz);
+                    // local number of grooves
+                    double N = gratingPtr->getN(x, y);
                     // alpha = v dot normVec
                     double alpha = nvx*nx;
                     alpha += nvy*ny;
@@ -1036,8 +1037,8 @@ namespace batoid {
                     double sin_grating = eta*sin_incident + grating_shift;
                     double nfactor = eta*alpha + sqrt(1-sin_grating*sin_grating);
                     // output
-                    vxptr[i] = eta*nvx - nfactor*nx + cosrot*grating_shift;
-                    vyptr[i] = eta*nvy - nfactor*ny + sinrot*grating_shift;
+                    vxptr[i] = eta*nvx - nfactor*nx + tx*grating_shift;
+                    vyptr[i] = eta*nvy - nfactor*ny + ty*grating_shift;
                     vzptr[i] = eta*nvz - nfactor*nz;
                     vxptr[i] /= n2;
                     vyptr[i] /= n2;
@@ -1059,13 +1060,11 @@ namespace batoid {
 
 
     void rSplit_grating(
-        const Surface& surface,
+        const Grating& grating,
         const vec3 dr, const mat3 drot,
         const Medium& m1, const Medium& m2,
         const Coating& coating,
-        RayVector& rv, RayVector& rvSplit,
-        const double N,
-        const double rot
+        RayVector& rv, RayVector& rvSplit
     ) {
         rv.x.syncToDevice();
         rv.y.syncToDevice();
@@ -1117,13 +1116,11 @@ namespace batoid {
         bool* vigptr2 = rvSplit.vignetted.data;
         bool* failptr2 = rvSplit.failed.data;
 
-        const Surface* surfacePtr = surface.getDevPtr();
+        const Grating* gratingPtr = grating.getDevPtr();
         const double* drptr = dr.data();
         const double* drotptr = drot.data();
         const Medium* mPtr = m2.getDevPtr();
         const Coating* cPtr = coating.getDevPtr();
-        const double cosrot = cos(rot);
-        const double sinrot = sin(rot);
 
         #if defined(BATOID_GPU)
             #pragma omp target teams distribute parallel for \
@@ -1147,7 +1144,7 @@ namespace batoid {
             if (!failptr[i]) {
                 // intersection
                 double dt = 0.0;
-                bool success = surfacePtr->timeToIntersect(x, y, z, vx, vy, vz, dt);
+                bool success = gratingPtr->timeToIntersect(x, y, z, vx, vy, vz, dt);
                 if (success) {
                     // propagation
                     x += vx * dt;
@@ -1165,7 +1162,12 @@ namespace batoid {
                     double nvy = vy*n1;
                     double nvz = vz*n1;
                     double nx, ny, nz;
-                    surfacePtr->normal(x, y, nx, ny, nz);
+                    gratingPtr->normal(x, y, nx, ny, nz);
+                    // disp axis unit vector
+                    double tx, ty, tz;
+                    gratingPtr->disp_axis(x, y, tx, ty, tz);
+                    // local number of grooves
+                    double N = gratingPtr->getN(x, y);
                     double alpha = nvx*nx;
                     alpha += nvy*ny;
                     alpha += nvz*nz;
@@ -1201,8 +1203,8 @@ namespace batoid {
                     double sin_grating = eta*sin_incident + grating_shift;
                     double nfactor = eta*alpha + sqrt(1-sin_grating*sin_grating);
                     // output
-                    vxptr[i] = eta*nvx - nfactor*nx + cosrot*grating_shift;
-                    vyptr[i] = eta*nvy - nfactor*ny + sinrot*grating_shift;
+                    vxptr[i] = eta*nvx - nfactor*nx + tx*grating_shift;
+                    vyptr[i] = eta*nvy - nfactor*ny + ty*grating_shift;
                     vzptr[i] = eta*nvz - nfactor*nz;
                     vxptr[i] /= n2;
                     vyptr[i] /= n2;

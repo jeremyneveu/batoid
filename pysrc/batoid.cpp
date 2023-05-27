@@ -17,6 +17,7 @@ namespace batoid {
     void pyExportQuadric(py::module&);
     void pyExportAsphere(py::module&);
     void pyExportTilted(py::module&);
+    void pyExportGrating(py::module&);
     void pyExportBicubic(py::module&);
     void pyExportSphere(py::module&);
     void pyExportSum(py::module&);
@@ -36,6 +37,7 @@ namespace batoid {
         pyExportSurface(m);
         pyExportQuadric(m);
         pyExportAsphere(m); // Order Surface, Quadric, Asphere important b/c inheritance
+        pyExportGrating(m);
         pyExportTilted(m);
         pyExportBicubic(m);
         pyExportSphere(m);

@@ -4,6 +4,7 @@
 #include <array>
 #include "rayVector.h"
 #include "surface.h"
+#include "grating.h"
 #include "medium.h"
 #include "obscuration.h"
 #include "coating.h"
@@ -34,18 +35,18 @@ namespace batoid {
         RayVector& rv, RayVector& rvSplit
     );
     void reflect_grating(
-        const Surface& surface, const vec3 dr, const mat3 drot, RayVector& rv,
-        const Coating* coating, const double N, const double rot
+        const Grating& grating, const vec3 dr, const mat3 drot, RayVector& rv,
+        const Coating* coating
     );
     void refract_grating(
-        const Surface& surface, const vec3 dr, const mat3 drot,
-        const Medium& m1, const Medium& m2, RayVector& rv, const Coating* coating, const double N, const double rot
+        const Grating& grating, const vec3 dr, const mat3 drot,
+        const Medium& m1, const Medium& m2, RayVector& rv, const Coating* coating
     );
     void rSplit_grating(
-        const Surface& surface, const vec3 dr, const mat3 drot,
+        const Grating& grating, const vec3 dr, const mat3 drot,
         const Medium& m1, const Medium& m2,
         const Coating& coating,
-        RayVector& rv, RayVector& rvSplit, const double N, const double rot
+        RayVector& rv, RayVector& rvSplit
     );
     void refractScreen(
         const Surface& surface, const vec3 dr, const mat3 drot,

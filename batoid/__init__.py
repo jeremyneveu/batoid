@@ -7,8 +7,10 @@ from .coordTransform import CoordTransform
 
 from .surface import (
     Surface, Plane, Paraboloid, Sphere, Quadric, Asphere, Bicubic, Sum, Tilted,
-    Zernike, Grating
+    Zernike
 )
+
+from .grating import Grating
 
 from .trace import (
     intersect, applyForwardTransform, applyReverseTransform, obscure,

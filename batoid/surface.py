@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from . import _batoid
-from .trace import intersect, rSplit, reflect, refract, refractScreen, refract_grating, reflect_grating, rSplit_grating
+from .trace import intersect, rSplit, reflect, refract, refractScreen
 
 
 class Surface(ABC):
@@ -608,111 +608,6 @@ class Bicubic(Surface):
         else:
             out += ", nanpolicy='zero')"
         return out
-
-
-class Grating(Surface):
-    """Grating planar surface.  The surface sag follows the equation:
-
-    .. math::
-
-        z(x, y) = 0
-    """
-    def __init__(self, N, rot=0):
-        self._surface = _batoid.CPPPlane()
-        self.N = N
-        self.rot = rot
-
-    def __hash__(self):
-        return hash("batoid.Grating")
-
-    def __setstate__(self, tup):
-        N, rot = tup
-        self.__init__(N, rot)
-
-    def __getstate__(self):
-        return ()
-
-    def __eq__(self, rhs):
-        return isinstance(rhs, Grating)
-
-    def __repr__(self):
-        return f"Grating({self.N},{self.rot})"
-
-    def reflect(self, rv, coordSys=None, coating=None):
-        """Calculate intersection of rays with this surface, and immediately
-        reflect the rays at the points of intersection.
-
-        Parameters
-        ----------
-        rv : RayVector
-            Rays to reflect.
-        coordSys : CoordSys, optional
-            If present, then use for the coordinate system of the surface.  If
-            ``None`` (default), then assume that rays and surface are already
-            expressed in the same coordinate system.
-        coating : Coating, optional
-            Apply this coating upon surface intersection.
-
-        Returns
-        -------
-        outRays : RayVector
-            New object corresponding to original rays propagated and reflected.
-        """
-        return reflect_grating(self, rv, coordSys, coating)
-
-    def refract(self, rv, inMedium, outMedium, coordSys=None, coating=None):
-        """Calculate intersection of rays with this surface, and immediately
-        refract the rays through the surface at the points of intersection.
-
-        Parameters
-        ----------
-        rv : RayVector
-            Rays to refract.
-        inMedium : Medium
-            Refractive medium on the incoming side of the surface.
-        outMedium : Medium
-            Refractive medium on the outgoing side of the surface.
-        coordSys : CoordSys, optional
-            If present, then use for the coordinate system of the surface.  If
-            ``None`` (default), then assume that rays and surface are already
-            expressed in the same coordinate system.
-        coating : Coating, optional
-            Apply this coating upon surface intersection.
-
-        Returns
-        -------
-        outRays : RayVector
-            New object corresponding to original rays propagated and refracted.
-        """
-        return refract_grating(self, rv, inMedium, outMedium, coordSys, coating)
-
-    def rSplit(self, rv, inMedium, outMedium, coating, coordSys=None):
-        """Calculate intersection of rays with this surface, and immediately
-        split the rays into reflected and refracted rays, with appropriate
-        fluxes.
-
-        Parameters
-        ----------
-        rv : RayVector
-            Rays to refract.
-        inMedium : Medium
-            Refractive medium on the incoming side of the surface.
-        outMedium : Medium
-            Refractive medium on the outgoing side of the surface.
-        coating : Coating
-            Coating object to control transmission coefficient.
-        coordSys : CoordSys, optional
-            If present, then use for the coordinate system of the surface.  If
-            ``None`` (default), then assume that rays and surface are already
-            expressed in the same coordinate system.
-
-        Returns
-        -------
-        reflectedRays, refractedRays : RayVector
-            New objects corresponding to original rays propagated and
-            reflected/refracted.
-        """
-        return rSplit_grating(self, rv, inMedium, outMedium, coating, coordSys)
 
 
 class Sum(Surface):

@@ -121,49 +121,49 @@ def rSplit(surface, rv, inMedium, outMedium, coating, coordSys=None):
 
 
 
-def reflect_grating(surface, rv, coordSys=None, coating=None):
+def reflect_grating(grating, rv, coordSys=None, coating=None):
     if coordSys is None:
         coordSys = rv.coordSys
     ct = CoordTransform(rv.coordSys, coordSys)
     _coating = coating._coating if coating else None
 
     _batoid.reflect_grating(
-        surface._surface,
+        grating._surface,
         ct.dr, ct.drot.ravel(),
-        rv._rv, _coating, surface.N, surface.rot
+        rv._rv, _coating
     )
     rv.coordSys = coordSys
     return rv
 
 
-def refract_grating(surface, rv, m1, m2, coordSys=None, coating=None):
+def refract_grating(grating, rv, m1, m2, coordSys=None, coating=None):
     if coordSys is None:
         coordSys = rv.coordSys
     ct = CoordTransform(rv.coordSys, coordSys)
     _coating = coating._coating if coating else None
 
     _batoid.refract_grating(
-        surface._surface,
+        grating._surface,
         ct.dr, ct.drot.ravel(),
         m1._medium, m2._medium,
-        rv._rv, _coating, surface.N, surface.rot
+        rv._rv, _coating
     )
     rv.coordSys = coordSys
     return rv
 
 
-def rSplit_grating(surface, rv, inMedium, outMedium, coating, coordSys=None):
+def rSplit_grating(grating, rv, inMedium, outMedium, coating, coordSys=None):
     if coordSys is None:
         coordSys = rv.coordSys
     ct = CoordTransform(rv.coordSys, coordSys)
 
     rvSplit = rv.copy()
     _batoid.rSplit_grating(
-        surface._surface,
+        grating._surface,
         ct.dr, ct.drot.ravel(),
         inMedium._medium, outMedium._medium,
         coating._coating,
-        rv._rv, rvSplit._rv, surface.N, surface.rot
+        rv._rv, rvSplit._rv
     )
     rv.coordSys = coordSys
     rvSplit.coordSys = coordSys

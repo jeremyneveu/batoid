@@ -31,6 +31,7 @@ set(SRC_FILES
   src/bicubic.cpp
   src/coating.cpp
   src/dualView.cpp
+  src/grating.cpp
   src/medium.cpp
   src/obscuration.cpp
   src/paraboloid.cpp
@@ -50,6 +51,7 @@ set(PYSRC_FILES
   pysrc/batoid.cpp
   pysrc/bicubic.cpp
   pysrc/coating.cpp
+  pysrc/grating.cpp
   pysrc/medium.cpp
   pysrc/obscuration.cpp
   pysrc/paraboloid.cpp
