@@ -1,4 +1,5 @@
 #include "batoid.h"
+#include <iostream>
 
 namespace batoid {
 
@@ -1182,23 +1183,10 @@ namespace batoid {
                     double reflect, transmit;
                     cPtr->getCoefs(wptr[i], alpha, reflect, transmit);
 
-                    // Reflection
-                    xptr2[i] = x;
-                    yptr2[i] = y;
-                    zptr2[i] = z;
-                    vxptr2[i] = vx - 2*alpha*nx/n1;
-                    vyptr2[i] = vy - 2*alpha*ny/n1;
-                    vzptr2[i] = vz - 2*alpha*nz/n1;
-                    tptr2[i] = t;
-                    wptr2[i] = wptr[i];
-                    fluxptr2[i] = fluxptr[i]*reflect;
-                    vigptr2[i] = vigptr[i];
-                    failptr2[i] = failptr[i];
-
                     // refraction
                     double n2 = mPtr->getN(wptr[i]);
                     double eta = n1/n2;
-                    double grating_shift =  N*wptr[i]/n2;
+                    double grating_shift = N*wptr[i]/n2;
                     double sin_incident = sqrt(1 - alpha*alpha);
                     double sin_grating = eta*sin_incident + grating_shift;
                     double nfactor = eta*alpha + sqrt(1-sin_grating*sin_grating);
@@ -1211,7 +1199,21 @@ namespace batoid {
                     vzptr[i] /= n2;
                     tptr[i] = t;
                     fluxptr[i] *= transmit;
-                } else {
+
+                    // Reflection
+                    grating_shift = N*wptr[i]/n1;
+                    sin_grating = -sin_incident + grating_shift;
+                    nfactor = alpha - sqrt(1-sin_grating*sin_grating);
+                    vxptr2[i] = nvx - nfactor*nx + tx*grating_shift;
+                    vyptr2[i] = nvy - nfactor*ny + ty*grating_shift;
+                    vzptr2[i] = nvz - nfactor*nz;
+                    tptr2[i] = t;
+                    wptr2[i] = wptr[i];
+                    fluxptr2[i] = fluxptr[i]*reflect;
+                    vigptr2[i] = vigptr[i];
+                    failptr2[i] = failptr[i];
+
+               } else {
                     vigptr[i] = true;
                     failptr[i] = true;
                     vigptr2[i] = true;
