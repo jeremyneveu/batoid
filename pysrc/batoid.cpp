@@ -55,12 +55,12 @@ namespace batoid {
         m.def("intersect", &intersect);
         m.def("reflect", &reflect);
         m.def("refract", &refract);
-        m.def("reflect_grating", &reflect);
-        m.def("refract_grating", &refract);
+        m.def("reflect_grating", &reflect_grating);
+        m.def("refract_grating", &refract_grating);
         m.def("refractScreen", &refractScreen);
         m.def("obscure", &obscure);
         m.def("rSplit", &rSplit);
-        m.def("rSplit_grating", &rSplit);
+        m.def("rSplit_grating", &rSplit_grating);
         m.def(
             "applyForwardTransformArrays",
             [](

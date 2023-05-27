@@ -130,7 +130,7 @@ def reflect_grating(surface, rv, coordSys=None, coating=None):
     _batoid.reflect_grating(
         surface._surface,
         ct.dr, ct.drot.ravel(),
-        rv._rv, _coating
+        rv._rv, _coating, surface.N, surface.rot
     )
     rv.coordSys = coordSys
     return rv
@@ -146,7 +146,7 @@ def refract_grating(surface, rv, m1, m2, coordSys=None, coating=None):
         surface._surface,
         ct.dr, ct.drot.ravel(),
         m1._medium, m2._medium,
-        rv._rv, _coating
+        rv._rv, _coating, surface.N, surface.rot
     )
     rv.coordSys = coordSys
     return rv
@@ -163,7 +163,7 @@ def rSplit_grating(surface, rv, inMedium, outMedium, coating, coordSys=None):
         ct.dr, ct.drot.ravel(),
         inMedium._medium, outMedium._medium,
         coating._coating,
-        rv._rv, rvSplit._rv
+        rv._rv, rvSplit._rv, surface.N, surface.rot
     )
     rv.coordSys = coordSys
     rvSplit.coordSys = coordSys

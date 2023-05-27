@@ -617,14 +617,17 @@ class Grating(Surface):
 
         z(x, y) = 0
     """
-    def __init__(self):
+    def __init__(self, N, rot=0):
         self._surface = _batoid.CPPPlane()
+        self.N = N
+        self.rot = rot
 
     def __hash__(self):
         return hash("batoid.Grating")
 
     def __setstate__(self, tup):
-        self.__init__()
+        N, rot = tup
+        self.__init__(N, rot)
 
     def __getstate__(self):
         return ()
@@ -633,7 +636,7 @@ class Grating(Surface):
         return isinstance(rhs, Grating)
 
     def __repr__(self):
-            return "Grating()"
+        return f"Grating({self.N},{self.rot})"
 
     def reflect(self, rv, coordSys=None, coating=None):
         """Calculate intersection of rays with this surface, and immediately
