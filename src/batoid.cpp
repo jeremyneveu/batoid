@@ -1,5 +1,4 @@
 #include "batoid.h"
-#include <iostream>
 
 namespace batoid {
 
@@ -848,6 +847,7 @@ namespace batoid {
         bool* failptr = rv.failed.data;
 
         const Grating* gratingPtr = grating.getDevPtr();
+        const int order = gratingPtr->getOrder();
         const double* drptr = dr.data();
         const double* drotptr = drot.data();
         const Coating* coatingPtr = nullptr;
@@ -908,7 +908,7 @@ namespace batoid {
                         nz *= -1;
                         alpha *= -1;
                     }
-                    double grating_shift =  N*wptr[i]/n1;
+                    double grating_shift = order*N*wptr[i]/n1;
                     double sin_incident = sqrt(1 - alpha*alpha);
                     double sin_grating = -sin_incident + grating_shift;
                     double nfactor = alpha - sqrt(1-sin_grating*sin_grating);
@@ -969,6 +969,7 @@ namespace batoid {
         bool* failptr = rv.failed.data;
 
         const Grating* gratingPtr = grating.getDevPtr();
+        const int order = gratingPtr->getOrder();
         const double* drptr = dr.data();
         const double* drotptr = drot.data();
         const Medium* mPtr = m2.getDevPtr();
@@ -1033,7 +1034,7 @@ namespace batoid {
                     }
                     double n2 = mPtr->getN(wptr[i]);
                     double eta = n1/n2;
-                    double grating_shift =  N*wptr[i]/n2;
+                    double grating_shift =  order*N*wptr[i]/n2;
                     double sin_incident = sqrt(1 - alpha*alpha);
                     double sin_grating = eta*sin_incident + grating_shift;
                     double nfactor = eta*alpha + sqrt(1-sin_grating*sin_grating);
@@ -1118,6 +1119,7 @@ namespace batoid {
         bool* failptr2 = rvSplit.failed.data;
 
         const Grating* gratingPtr = grating.getDevPtr();
+        const int order = gratingPtr->getOrder();
         const double* drptr = dr.data();
         const double* drotptr = drot.data();
         const Medium* mPtr = m2.getDevPtr();
@@ -1186,7 +1188,7 @@ namespace batoid {
                     // refraction
                     double n2 = mPtr->getN(wptr[i]);
                     double eta = n1/n2;
-                    double grating_shift = N*wptr[i]/n2;
+                    double grating_shift = order*N*wptr[i]/n2;
                     double sin_incident = sqrt(1 - alpha*alpha);
                     double sin_grating = eta*sin_incident + grating_shift;
                     double nfactor = eta*alpha + sqrt(1-sin_grating*sin_grating);
@@ -1201,7 +1203,7 @@ namespace batoid {
                     fluxptr[i] *= transmit;
 
                     // Reflection
-                    grating_shift = N*wptr[i]/n1;
+                    grating_shift = order*N*wptr[i]/n1;
                     sin_grating = -sin_incident + grating_shift;
                     nfactor = alpha - sqrt(1-sin_grating*sin_grating);
                     vxptr2[i] = nvx - nfactor*nx + tx*grating_shift;

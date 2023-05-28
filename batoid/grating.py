@@ -7,32 +7,15 @@ from . import _batoid
 
 
 class Grating(Surface):
-    """Grating planar surface.  The surface sag follows the equation:
+    """Planar grating, with N grooves per meter and oriented with rot in radians.
+    The surface sag follows the equation:
 
     .. math::
 
         z(x, y) = 0
     """
-    def __init__(self, N, rot=0):
-        self._surface = _batoid.CPPGrating(N, rot)
-        self.N = N
-        self.rot = rot
-
-    def __hash__(self):
-        return hash("batoid.Grating")
-
-    def __setstate__(self, tup):
-        N, rot = tup
-        self.__init__(N, rot)
-
-    def __getstate__(self):
-        return ()
-
-    def __eq__(self, rhs):
-        return isinstance(rhs, Grating)
-
-    def __repr__(self):
-        return f"Grating({self.N},{self.rot})"
+    def __init__(self, order=1):
+        self.order = order
 
     def getN(self, x, y):
         """Return local number of grooves per meter.
@@ -152,4 +135,35 @@ class Grating(Surface):
             reflected/refracted.
         """
         return rSplit_grating(self, rv, inMedium, outMedium, coating, coordSys)
+
+
+class SimpleGrating(Grating):
+    """Planar grating, with N grooves per meter and oriented with rot in radians.
+    The surface sag follows the equation:
+
+    .. math::
+
+        z(x, y) = 0
+    """
+    def __init__(self, order=1, N=1e5, rot=0):
+        Grating.__init__(self, order=order)
+        self._surface = _batoid.CPPSimpleGrating(order, N, rot)
+        self.N = N
+        self.rot = rot
+
+    def __hash__(self):
+        return hash("batoid.SimpleGrating")
+
+    def __setstate__(self, tup):
+        order, N, rot = tup
+        self.__init__(order, N, rot)
+
+    def __getstate__(self):
+        return (self.order, self.N, self.rot)
+
+    def __eq__(self, rhs):
+        return isinstance(rhs, SimpleGrating)
+
+    def __repr__(self):
+        return f"SimpleGrating({self.order},{self.N},{self.rot})"
 

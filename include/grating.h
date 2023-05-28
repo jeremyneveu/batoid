@@ -11,10 +11,11 @@ namespace batoid {
 
     class Grating : public Surface {
     public:
-        Grating(double N, double rot);
+        Grating(int order);
         ~Grating();
 
         virtual const Grating* getDevPtr() const override;
+        virtual int getOrder() const;
         virtual double getN(double x, double y) const;
 
         virtual double sag(double, double) const override;
@@ -32,7 +33,24 @@ namespace batoid {
             double& dt
         ) const override;
 
-    private:
+    protected:
+        const int _order;
+    };
+
+    class SimpleGrating : public Grating {
+    public:
+        SimpleGrating(int order, double N, double rot);
+        ~SimpleGrating();
+
+        virtual const Grating* getDevPtr() const override;
+        virtual double getN(double x, double y) const override;
+
+        virtual void disp_axis(
+            double x, double y,
+            double& tx, double& ty, double& tz
+        ) const override;
+
+    protected:
         const double _N, _rot;
     };
 

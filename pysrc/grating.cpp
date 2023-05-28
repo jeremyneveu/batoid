@@ -9,7 +9,7 @@ using namespace pybind11::literals;
 namespace batoid {
     void pyExportGrating(py::module& m) {
         py::class_<Grating, std::shared_ptr<Grating>, Surface>(m, "CPPGrating")
-            .def(py::init<double,double>(), "init", "N"_a, "rot"_a)
+            .def(py::init<int>(), "init", "order"_a)
             .def("getN", py::vectorize(&Grating::getN))
             .def("disp_axis",
                 [](const Grating& s, size_t xarr, size_t yarr, size_t size, size_t outarr)
@@ -23,6 +23,11 @@ namespace batoid {
                     }
                 }
             )
-            ;
+        ;
+    }
+    void pyExportSimpleGrating(py::module& m) {
+        py::class_<SimpleGrating, std::shared_ptr<SimpleGrating>, Grating, Surface>(m, "CPPSimpleGrating")
+            .def(py::init<int,double,double>(), "init", "order"_a, "N"_a, "rot"_a)
+        ;
     }
 }
