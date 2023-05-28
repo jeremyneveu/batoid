@@ -3,6 +3,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .coating import SimpleCoating
+from .grating import SimpleGrating
 from .obscuration import ObscNegation, ObscCircle, ObscAnnulus
 from .constants import globalCoordSys, vacuum
 from .coordTransform import CoordTransform
@@ -753,6 +754,23 @@ class RefractiveInterface(Interface):
             coating = self.reverseCoating
 
         return self.surface.rSplit(rv, m1, m2, coating, coordSys=self.coordSys)
+
+
+class RonchiTransmissionGrating(RefractiveInterface):
+    """Specialization for refractive interfaces.
+
+    Rays will interact with this surface by refracting through it.
+    """
+    def __init__(self, *args, **kwargs):
+        RefractiveInterface.__init__(self, *args, **kwargs)
+        if not isinstance(self.surface, SimpleGrating):
+            raise TypeError("With RonchiTransmissionGrating, surface must be SimpleGrating.")
+        self.forwardCoating = SimpleCoating(
+            reflectivity=0.0, transmissivity=0.1
+        )
+        self.reverseCoating = SimpleCoating(
+            reflectivity=0.0, transmissivity=0.1
+        )
 
 
 class Mirror(Interface):

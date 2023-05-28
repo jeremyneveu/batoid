@@ -121,6 +121,12 @@ def parse_optic(config,
             surface, name=name,
             coordSys=coordSys, obscuration=obscuration,
             inMedium=inMedium, outMedium=outMedium)
+    elif typ == 'RonchiTransmissionGrating':
+        surface = parse_surface(config.pop('surface'))
+        return batoid.optic.RonchiTransmissionGrating(
+            surface, name=name,
+            coordSys=coordSys, obscuration=obscuration,
+            inMedium=inMedium, outMedium=outMedium)
     elif typ == 'OPDScreen':
         surface = parse_surface(config.pop('surface'))
         screen = parse_surface(config.pop('screen'))

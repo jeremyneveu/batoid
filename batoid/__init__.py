@@ -30,6 +30,7 @@ from .coating import Coating, SimpleCoating
 
 from .optic import Optic, CompoundOptic, Lens
 from .optic import Interface, RefractiveInterface, Mirror, Detector, Baffle
+from .optic import RonchiTransmissionGrating
 from .optic import OPDScreen
 from .optic import drawTrace2d, drawTrace3d
 
