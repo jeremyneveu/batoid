@@ -39,7 +39,7 @@ namespace batoid {
 
     class SimpleGrating : public Grating {
     public:
-        SimpleGrating(int order, double N, double rot);
+        SimpleGrating(int order, double N);
         ~SimpleGrating();
 
         virtual const Grating* getDevPtr() const override;
@@ -51,7 +51,30 @@ namespace batoid {
         ) const override;
 
     protected:
-        const double _N, _rot;
+        const double _N;
+    };
+
+    class HologramGrating : public Grating {
+    public:
+        HologramGrating(int order, double lbdaRec, double xA, double yA, double zA, double xB, double yB, double zB);
+        ~HologramGrating();
+
+        virtual const Grating* getDevPtr() const override;
+        virtual double getN(double x, double y) const override;
+
+        virtual void disp_axis(
+            double x, double y,
+            double& tx, double& ty, double& tz
+        ) const override;
+
+    protected:
+        const double _lbdaRec;
+        const double _xA, _yA, _zA;
+        const double _xB, _yB, _zB;
+
+    private:
+        double _computeAPDist(double x, double y, double z) const;
+        double _computeBPDist(double x, double y, double z) const;
     };
 
     #if defined(BATOID_GPU)

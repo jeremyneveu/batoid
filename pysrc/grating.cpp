@@ -25,9 +25,17 @@ namespace batoid {
             )
         ;
     }
+
     void pyExportSimpleGrating(py::module& m) {
         py::class_<SimpleGrating, std::shared_ptr<SimpleGrating>, Grating, Surface>(m, "CPPSimpleGrating")
-            .def(py::init<int,double,double>(), "init", "order"_a, "N"_a, "rot"_a)
+            .def(py::init<int,double>(), "init", "order"_a, "N"_a)
         ;
     }
+
+    void pyExportHologramGrating(py::module& m) {
+        py::class_<HologramGrating, std::shared_ptr<HologramGrating>, Grating, Surface>(m, "CPPHologramGrating")
+            .def(py::init<int,double,double,double,double,double,double,double>(), "init", "order"_a, "lbdaRec"_a, "xA"_a, "yA"_a, "zA"_a, "xB"_a, "yB"_a, "zB"_a)
+        ;
+    }
+
 }

@@ -10,7 +10,7 @@ from .surface import (
     Zernike
 )
 
-from .grating import Grating, SimpleGrating
+from .grating import Grating, SimpleGrating, HologramGrating
 
 from .trace import (
     intersect, applyForwardTransform, applyReverseTransform, obscure,
