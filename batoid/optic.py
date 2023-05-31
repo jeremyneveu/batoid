@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .coating import SimpleCoating
-from .obscuration import ObscNegation, ObscCircle, ObscEllipse, ObscAnnulus
+from .obscuration import ObscNegation, ObscCircle, ObscEllipse, ObscAnnulus, ObscRectangle
 from .constants import globalCoordSys, vacuum
 from .coordTransform import CoordTransform
 from .utils import lazy_property
@@ -128,6 +128,8 @@ class Interface(Optic):
                     self.outRadius = self.obscuration.original.radius
                 if isinstance(self.obscuration.original, ObscEllipse):
                     self.outRadius = self.obscuration.original.a
+                elif isinstance(self.obscuration.original, ObscRectangle):
+                    self.outRadius = self.obscuration.original.width * 0.5
                 elif isinstance(self.obscuration.original, ObscAnnulus):
                     self.outRadius = self.obscuration.original.outer
                     self.inRadius = self.obscuration.original.inner
@@ -138,7 +140,9 @@ class Interface(Optic):
             elif isinstance(self.obscuration, ObscAnnulus):
                 self.outRadius = self.obscuration.outer
                 self.inRadius = self.obscuration.inner
-
+            elif isinstance(self.obscuration, ObscRectangle):
+                self.outRadius = self.obscuration.width * 0.5
+                
     def __hash__(self):
         return hash((self.__class__.__name__, self.surface, self.obscuration,
                      self.name, self.inMedium, self.outMedium, self.coordSys))
