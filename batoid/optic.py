@@ -774,20 +774,22 @@ class Mirror(Interface):
     """
     def __init__(self, *args, **kwargs):
         Interface.__init__(self, *args, **kwargs)
-        self.forwardCoating = SimpleCoating(
-            reflectivity=1.0, transmissivity=0.0
-        )
-        self.reverseCoating = SimpleCoating(
-            reflectivity=1.0, transmissivity=0.0
-        )
+        if not hasattr(self, "forwardCoating"):
+            self.forwardCoating = SimpleCoating(
+                reflectivity=1.0, transmissivity=0.0
+            )
+        if not hasattr(self, "reverseCoating"):
+            self.reverseCoating = SimpleCoating(
+                reflectivity=1.0, transmissivity=0.0
+            )
 
     def interact(self, rv, reverse=False):
         # reflect is independent of reverse
-        return self.surface.reflect(rv, coordSys=self.coordSys)
+        return self.surface.reflect(rv, coating=self.forwardCoating, coordSys=self.coordSys)
 
     def rSplit(self, rv, reverse=False):
         # reflect is independent of reverse
-        return None, self.surface.reflect(rv, coordSys=self.coordSys)
+        return None, self.surface.reflect(rv, coating=self.forwardCoating, coordSys=self.coordSys)
 
 
 class Detector(Interface):
@@ -799,15 +801,16 @@ class Detector(Interface):
     """
     def __init__(self, *args, **kwargs):
         Interface.__init__(self, *args, **kwargs)
-        self.forwardCoating = SimpleCoating(
-            reflectivity=0.0, transmissivity=1.0
-        )
+        if not hasattr(self, "forwardCoating"):
+            self.forwardCoating = SimpleCoating(
+                reflectivity=0.0, transmissivity=1.0
+            )
         self.reverseCoating = None
 
     def rSplit(self, rv, reverse=False):
         assert reverse == False
         return self.surface.rSplit(
-            rv, self.inMedium, self.outMedium, self.forwardCoating,
+            rv, self.inMedium, self.outMedium, coating=self.forwardCoating,
             coordSys=self.coordSys
         )
 
