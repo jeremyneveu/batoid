@@ -1,4 +1,4 @@
-from batoid.trace import reflect
+import numpy as np
 from . import _batoid
 
 
@@ -103,3 +103,72 @@ class SimpleCoating(Coating):
 
     def __repr__(self):
         return f"SimpleCoating({self.reflectivity}, {self.transmissivity})"
+
+
+class TableCoating(Coating):
+    """A `Coating` with reflectivity and transmissivity defined via a lookup table.
+
+    Parameters
+    ----------
+    wavelengths : np.ndarray
+        Wavelengths in meters.
+    reflectivities : np.ndarray
+        Reflectivity of the coating.
+    transmissivities : np.ndarray
+        Transmissivity of the coating.
+    """
+    def __init__(self, wavelengths, reflectivities, transmissivities):
+        self.wavelengths = np.array(wavelengths)
+        self.reflectivities = np.array(reflectivities)
+        self.transmissivities = np.array(transmissivities)
+        self._coating = _batoid.CPPTableCoating(
+            self.wavelengths.ctypes.data,
+            self.reflectivities.ctypes.data,
+            self.transmissivities.ctypes.data,
+            len(self.wavelengths)
+        )
+
+    @classmethod
+    def fromTxt(cls, filename, **kwargs):
+        """Load a text file with reflectivity and transmissivity information in it.
+        The file should have three columns, the first with wavelength in microns,
+        the second with the corresponding reflectivity, and the third with the corresponding transmissivity.
+        """
+        import os
+        try:
+            wavelength, reflectivity, transmissivity = np.loadtxt(filename, unpack=True, **kwargs)
+        except IOError:
+            import glob
+            from . import datadir
+            filenames = glob.glob(os.path.join(datadir, "**", "*.txt"))
+            for candidate in filenames:
+                if os.path.basename(candidate) == filename:
+                    wavelength, reflectivity, transmissivity = np.loadtxt(candidate, unpack=True, **kwargs)
+                    break
+            else:
+                raise FileNotFoundError(filename)
+        return TableCoating(wavelength*1e-6, reflectivity, transmissivity)
+
+    def __eq__(self, rhs):
+        if type(rhs) == type(self):
+            return (
+                np.array_equal(self.wavelengths, rhs.wavelengths)
+                and np.array_equal(self.reflectivities, rhs.reflectivities)
+                and np.array_equal(self.transmissivities, rhs.transmissivities)
+            )
+        return False
+
+    def __getstate__(self):
+        return self.wavelengths, self.reflectivities, self.transmissivities
+
+    def __setstate__(self, args):
+        self.__init__(*args)
+
+    def __hash__(self):
+        return hash((
+            "batoid.TableCoating", tuple(self.wavelengths), tuple(self.reflectivities), tuple(self.transmissivities)
+        ))
+
+    def __repr__(self):
+        return f"TableCoating({self.wavelengths!r}, {self.reflectivities!r}, {self.transmissivities!r})"
+

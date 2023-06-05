@@ -735,19 +735,23 @@ class RefractiveInterface(Interface):
     """
     def __init__(self, *args, **kwargs):
         Interface.__init__(self, *args, **kwargs)
-        self.forwardCoating = SimpleCoating(
-            reflectivity=0.0, transmissivity=1.0
-        )
-        self.reverseCoating = SimpleCoating(
-            reflectivity=0.0, transmissivity=1.0
-        )
+        if not hasattr(self, "forwardCoating"):
+            self.forwardCoating = SimpleCoating(
+                reflectivity=0.0, transmissivity=1.0
+            )
+        if not hasattr(self, "reverseCoating"):
+            self.reverseCoating = SimpleCoating(
+                reflectivity=0.0, transmissivity=1.0
+            )
 
     def interact(self, rv, reverse=False):
         if reverse:
             m1, m2 = self.outMedium, self.inMedium
+            coating = self.forwardCoating
         else:
             m1, m2 = self.inMedium, self.outMedium
-        return self.surface.refract(rv, m1, m2, coordSys=self.coordSys)
+            coating = self.reverseCoating
+        return self.surface.refract(rv, m1, m2, coating=coating, coordSys=self.coordSys)
 
     def rSplit(self, rv, reverse=False):
         # always return in order: refracted, reflected
@@ -760,7 +764,7 @@ class RefractiveInterface(Interface):
             m2 = self.outMedium
             coating = self.reverseCoating
 
-        return self.surface.rSplit(rv, m1, m2, coating, coordSys=self.coordSys)
+        return self.surface.rSplit(rv, m1, m2, coating=coating, coordSys=self.coordSys)
 
 
 class Mirror(Interface):

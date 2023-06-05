@@ -1,6 +1,9 @@
 #ifndef batoid_coating_h
 #define batoid_coating_h
 
+#include <cstdlib>
+
+
 namespace batoid {
 
     #if defined(BATOID_GPU)
@@ -46,6 +49,26 @@ namespace batoid {
     #if defined(BATOID_GPU)
         #pragma omp end declare target
     #endif
+
+    class TableCoating : public Coating {
+    public:
+        TableCoating(const double* args, const double* reflectivities, const double* transmissivities, const size_t size);
+        ~TableCoating();
+
+        void getCoefs(double wavelength, double cosIncidenceAngle, double& reflect, double& transmit) const override;
+        double getReflect(double wavelength, double cosIncidenceAngle) const override;
+        double getTransmit(double wavelength, double cosIncidenceAngle) const override;
+
+        const Coating* getDevPtr() const override;
+
+    private:
+        const double* _args;
+        const double* _reflectivities;
+        const double* _transmissivities;
+        const size_t _size;
+    };
+
+
 
 }
 

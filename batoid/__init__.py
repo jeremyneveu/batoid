@@ -24,7 +24,7 @@ from .obscuration import (
     ObscNegation, ObscUnion, ObscIntersection
 )
 
-from .coating import Coating, SimpleCoating
+from .coating import Coating, SimpleCoating, TableCoating
 
 from .optic import Optic, CompoundOptic, Lens
 from .optic import Interface, RefractiveInterface, Mirror, Detector, Baffle
