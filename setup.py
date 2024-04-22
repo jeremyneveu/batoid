@@ -53,7 +53,7 @@ class CMakeBuild(build_ext):
         if 'CMAKE_VERBOSE_MAKEFILE' in env:
             cmake_args += ['-DCMAKE_VERBOSE_MAKEFILE=1']
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args)  #, cwd=self.build_temp)
 
 
 with open("README.rst", 'r') as fh:

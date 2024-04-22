@@ -4,7 +4,7 @@ import numpy as np
 
 from .coating import SimpleCoating
 from .grating import SimpleGrating
-from .obscuration import ObscNegation, ObscCircle, ObscAnnulus
+from .obscuration import ObscNegation, ObscCircle, ObscEllipse, ObscAnnulus, ObscRectangle
 from .constants import globalCoordSys, vacuum
 from .coordTransform import CoordTransform
 from .utils import lazy_property
@@ -127,15 +127,23 @@ class Interface(Optic):
             if isinstance(self.obscuration, ObscNegation):
                 if isinstance(self.obscuration.original, ObscCircle):
                     self.outRadius = self.obscuration.original.radius
+                if isinstance(self.obscuration.original, ObscEllipse):
+                    self.outRadius = self.obscuration.original.a
+                elif isinstance(self.obscuration.original, ObscRectangle):
+                    self.outRadius = self.obscuration.original.width * 0.5
                 elif isinstance(self.obscuration.original, ObscAnnulus):
                     self.outRadius = self.obscuration.original.outer
                     self.inRadius = self.obscuration.original.inner
             elif isinstance(self.obscuration, ObscCircle):
                 self.outRadius = self.obscuration.radius
+            elif isinstance(self.obscuration, ObscEllipse):
+                self.outRadius = self.obscuration.a
             elif isinstance(self.obscuration, ObscAnnulus):
                 self.outRadius = self.obscuration.outer
                 self.inRadius = self.obscuration.inner
-
+            elif isinstance(self.obscuration, ObscRectangle):
+                self.outRadius = self.obscuration.width * 0.5
+                
     def __hash__(self):
         return hash((self.__class__.__name__, self.surface, self.obscuration,
                      self.name, self.inMedium, self.outMedium, self.coordSys))
@@ -728,19 +736,23 @@ class RefractiveInterface(Interface):
     """
     def __init__(self, *args, **kwargs):
         Interface.__init__(self, *args, **kwargs)
-        self.forwardCoating = SimpleCoating(
-            reflectivity=0.0, transmissivity=1.0
-        )
-        self.reverseCoating = SimpleCoating(
-            reflectivity=0.0, transmissivity=1.0
-        )
+        if not hasattr(self, "forwardCoating"):
+            self.forwardCoating = SimpleCoating(
+                reflectivity=0.0, transmissivity=1.0
+            )
+        if not hasattr(self, "reverseCoating"):
+            self.reverseCoating = SimpleCoating(
+                reflectivity=0.0, transmissivity=1.0
+            )
 
     def interact(self, rv, reverse=False):
         if reverse:
             m1, m2 = self.outMedium, self.inMedium
+            coating = self.forwardCoating
         else:
             m1, m2 = self.inMedium, self.outMedium
-        return self.surface.refract(rv, m1, m2, coordSys=self.coordSys)
+            coating = self.reverseCoating
+        return self.surface.refract(rv, m1, m2, coating=coating, coordSys=self.coordSys)
 
     def rSplit(self, rv, reverse=False):
         # always return in order: refracted, reflected
@@ -753,7 +765,7 @@ class RefractiveInterface(Interface):
             m2 = self.outMedium
             coating = self.reverseCoating
 
-        return self.surface.rSplit(rv, m1, m2, coating, coordSys=self.coordSys)
+        return self.surface.rSplit(rv, m1, m2, coating=coating, coordSys=self.coordSys)
 
 
 class RonchiTransmissionGrating(RefractiveInterface):
@@ -780,20 +792,22 @@ class Mirror(Interface):
     """
     def __init__(self, *args, **kwargs):
         Interface.__init__(self, *args, **kwargs)
-        self.forwardCoating = SimpleCoating(
-            reflectivity=1.0, transmissivity=0.0
-        )
-        self.reverseCoating = SimpleCoating(
-            reflectivity=1.0, transmissivity=0.0
-        )
+        if not hasattr(self, "forwardCoating"):
+            self.forwardCoating = SimpleCoating(
+                reflectivity=1.0, transmissivity=0.0
+            )
+        if not hasattr(self, "reverseCoating"):
+            self.reverseCoating = SimpleCoating(
+                reflectivity=1.0, transmissivity=0.0
+            )
 
     def interact(self, rv, reverse=False):
         # reflect is independent of reverse
-        return self.surface.reflect(rv, coordSys=self.coordSys)
+        return self.surface.reflect(rv, coating=self.forwardCoating, coordSys=self.coordSys)
 
     def rSplit(self, rv, reverse=False):
         # reflect is independent of reverse
-        return None, self.surface.reflect(rv, coordSys=self.coordSys)
+        return None, self.surface.reflect(rv, coating=self.forwardCoating, coordSys=self.coordSys)
 
 
 class Detector(Interface):
@@ -805,15 +819,16 @@ class Detector(Interface):
     """
     def __init__(self, *args, **kwargs):
         Interface.__init__(self, *args, **kwargs)
-        self.forwardCoating = SimpleCoating(
-            reflectivity=0.0, transmissivity=1.0
-        )
+        if not hasattr(self, "forwardCoating"):
+            self.forwardCoating = SimpleCoating(
+                reflectivity=0.0, transmissivity=1.0
+            )
         self.reverseCoating = None
 
     def rSplit(self, rv, reverse=False):
         assert reverse == False
         return self.surface.rSplit(
-            rv, self.inMedium, self.outMedium, self.forwardCoating,
+            rv, self.inMedium, self.outMedium, coating=self.forwardCoating,
             coordSys=self.coordSys
         )
 
