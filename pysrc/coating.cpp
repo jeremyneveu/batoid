@@ -18,5 +18,23 @@ namespace batoid {
 
         py::class_<SimpleCoating, std::shared_ptr<SimpleCoating>, Coating>(m, "CPPSimpleCoating")
             .def(py::init<double,double>(), "reflectivity"_a, "transmissivity"_a);
+
+        py::class_<TableCoating, std::shared_ptr<TableCoating>, Coating>(m, "CPPTableCoating")
+            .def(py::init(
+                [](
+                    size_t w,
+                    size_t r,
+                    size_t t,
+                    size_t size
+                ){
+                    return new TableCoating(
+                        reinterpret_cast<double*>(w),
+                        reinterpret_cast<double*>(r),
+                        reinterpret_cast<double*>(t),
+                        size
+                    );
+                }
+        ));
+
     }
 }
